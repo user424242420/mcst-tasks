@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
   }
   printf("\n");
 
+  free(result);
+
   return EXIT_SUCCESS;
 }
 
@@ -120,6 +122,8 @@ void *merge_sort(void *arg) {
       r_cur++;
     }
   }
+  free(l_buff);
+  free(r_buff);
 
   return (void *)target;
 }
