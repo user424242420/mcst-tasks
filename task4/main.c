@@ -90,5 +90,9 @@ int main(int argc, char *argv[]) {
 
   printf("\n");
 
+  free(s_big_opts);
+  free(s_opts);
+  free(non_opts);
+
   return EXIT_SUCCESS;
 }
