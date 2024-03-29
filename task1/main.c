@@ -23,14 +23,14 @@ int main(int argc, char *argv[]) {
   count_processes = get_nprocs_conf();
 
   int count;
-  int *up;
-  int *down;
-  int *result;
+  int *up = NULL;
+  int *down = NULL;
+  int *result = NULL;
 
   printf("Input count elements: ");
   scanf("%d", &count_el);
-  up = malloc(count_el * sizeof(int));
-  down = malloc(count_el * sizeof(int));
+  up = calloc(count_el + 1, sizeof(int));
+  down = calloc(count_el + 1, sizeof(int));
 
   for (unsigned int i = 0; i < count_el; i++) {
     scanf("%d", &up[i]);
@@ -43,14 +43,14 @@ int main(int argc, char *argv[]) {
   }
   printf("\n");
 
-  free(result);
-
+  free(up);
+  free(down);
   return EXIT_SUCCESS;
 }
 
 void *merge_sort(void *arg) {
 
-  struct run_merge_sort *decode;
+  struct run_merge_sort *decode = NULL;
   decode = (struct run_merge_sort *)arg;
 
   int *up = decode->up;
@@ -61,8 +61,8 @@ void *merge_sort(void *arg) {
     down[left] = up[left];
     return down;
   }
-  int *l_buff;
-  int *r_buff;
+  int *l_buff = calloc(count_el, sizeof(int));
+  int *r_buff = calloc(count_el, sizeof(int));
   void *l_buff_v;
   void *r_buff_v;
 
@@ -98,6 +98,8 @@ void *merge_sort(void *arg) {
     pthread_mutex_lock(&mutex_count_threads);
     count_threads -= 2;
     pthread_mutex_unlock(&mutex_count_threads);
+    free(l_buff);
+    free(r_buff);
     l_buff = (int *)l_buff_v;
     r_buff = (int *)r_buff_v;
   }
@@ -122,8 +124,6 @@ void *merge_sort(void *arg) {
       r_cur++;
     }
   }
-  free(l_buff);
-  free(r_buff);
 
   return (void *)target;
 }
