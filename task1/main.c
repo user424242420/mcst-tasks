@@ -5,14 +5,15 @@
 #include <string.h>
 #include <sys/sysinfo.h>
 
-struct run_merge_sort {
+struct run_merge_sort { // структура для передачи в pthread
   int *up;
   int *down;
   unsigned int left;
   unsigned int right;
 };
 
-pthread_mutex_t mutex_count_threads = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_count_threads =
+    PTHREAD_MUTEX_INITIALIZER; // mutex для указания количества потоков
 int count_threads, count_processes;
 void *work(void *param);
 void *merge_sort(void *arg);
@@ -20,7 +21,7 @@ void *merge_sort(void *arg);
 unsigned int count_el;
 
 int main(int argc, char *argv[]) {
-  count_processes = get_nprocs_conf();
+  count_processes = get_nprocs_conf(); // количесто процессов
 
   int count;
   int *up = NULL;
@@ -28,18 +29,20 @@ int main(int argc, char *argv[]) {
   int *result = NULL;
 
   printf("Input count elements: ");
-  scanf("%d", &count_el);
-  up = calloc(count_el + 1, sizeof(int));
+  scanf("%u", &count_el);
+  up = calloc(count_el + 1,
+              sizeof(int)); // выделяем память для записи и сортировки
   down = calloc(count_el + 1, sizeof(int));
 
   for (unsigned int i = 0; i < count_el; i++) {
-    scanf("%d", &up[i]);
+    scanf("%i", &up[i]);
   }
-  struct run_merge_sort params = {up, down, 0, count_el};
-  result = (int *)merge_sort((void *)&params);
+  struct run_merge_sort params = {up, down, 0, count_el - 1};
+  result = (int *)merge_sort(
+      (void *)&params); // вызываем рекурсивную функцию для сортировки
   printf("\nResult:\n");
   for (unsigned int i = 0; i < count_el; i++) {
-    printf("%d ", result[i + 1]);
+    printf("%i ", result[i]);
   }
   printf("\n");
 
@@ -51,7 +54,7 @@ int main(int argc, char *argv[]) {
 void *merge_sort(void *arg) {
 
   struct run_merge_sort *decode = NULL;
-  decode = (struct run_merge_sort *)arg;
+  decode = (struct run_merge_sort *)arg; // декодируем параметры
 
   int *up = decode->up;
   int *down = decode->down;
@@ -81,13 +84,13 @@ void *merge_sort(void *arg) {
   i2.left = middle + 1;
   i2.right = right;
 
-  if (count_threads > count_processes + 1) {
-
+  if (count_threads >
+      count_processes + 1) { // проверяем что потоков не слишком много
     l_buff = (int *)merge_sort((void *)&i1);
     r_buff = (int *)merge_sort((void *)&i2);
   }
 
-  else {
+  else { // если нормально то запускаем в pthread рекурсию и получаем результат
     pthread_mutex_lock(&mutex_count_threads);
     count_threads += 2;
     pthread_mutex_unlock(&mutex_count_threads);
@@ -107,7 +110,9 @@ void *merge_sort(void *arg) {
   int *target = l_buff == up ? down : up;
 
   unsigned int l_cur = left, r_cur = middle + 1;
-  for (unsigned int i = left; i <= right; i++) {
+
+  for (unsigned int i = left; i <= right;
+       i++) { // сортируем по алгоритму merge sort
     if (l_cur <= middle && r_cur <= right) {
       if (l_buff[l_cur] < r_buff[r_cur]) {
         target[i] = l_buff[l_cur];
@@ -124,6 +129,5 @@ void *merge_sort(void *arg) {
       r_cur++;
     }
   }
-
   return (void *)target;
 }
